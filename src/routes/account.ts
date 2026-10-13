@@ -3,6 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { generateSecret, generateURI } from "otplib";
 import QRCode from "qrcode";
 import { requireAuth, requireRecentAuth } from "../auth/accessControl.ts";
+import { verifyPassword } from "../auth/passwords.ts";
 import type { CurrentSession } from "../auth/sessions.ts";
 import { verifyTotpCode } from "../auth/totp.ts";
 import { generateBackupCodes } from "../auth/totpBackupCodes.ts";
@@ -171,7 +172,7 @@ export function createAccountRouter(deps: Dependencies): Router {
       return;
     }
     const currentPassword = String(req.body.currentPassword ?? "");
-    if (!currentPassword) {
+    if (!currentPassword ||!verifyPassword(currentPassword, current.user.password_hash)) {
       res
         .status(403)
         .type("html")
