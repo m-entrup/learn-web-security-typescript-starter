@@ -172,7 +172,10 @@ export function createAccountRouter(deps: Dependencies): Router {
       return;
     }
     const currentPassword = String(req.body.currentPassword ?? "");
-    if (!currentPassword ||!verifyPassword(currentPassword, current.user.password_hash)) {
+    if (
+      !currentPassword ||
+      !verifyPassword(currentPassword, current.user.password_hash)
+    ) {
       res
         .status(403)
         .type("html")
@@ -286,6 +289,15 @@ export function createAccountRouter(deps: Dependencies): Router {
     if (!current) return;
     const review = requireOwnedReview(db, req, res);
     if (!review) return;
+    if (review.user_id !== current.user.id) {
+      sendErrorPage(
+        res,
+        404,
+        "Review Not Found",
+        "We couldn't find that review.",
+      );
+      return undefined;
+    }
     res
       .type("html")
       .send(
@@ -311,6 +323,15 @@ export function createAccountRouter(deps: Dependencies): Router {
     }
     const review = requireOwnedReview(db, req, res);
     if (!review) return;
+    if (review.user_id !== current.user.id) {
+      sendErrorPage(
+        res,
+        404,
+        "Review Not Found",
+        "We couldn't find that review.",
+      );
+      return undefined;
+    }
     const rating = Number(req.body.rating);
     const body = parseReviewBody(req.body.body);
     if (
@@ -350,6 +371,15 @@ export function createAccountRouter(deps: Dependencies): Router {
     }
     const review = requireOwnedReview(db, req, res);
     if (!review) return;
+    if (review.user_id !== current.user.id) {
+      sendErrorPage(
+        res,
+        404,
+        "Review Not Found",
+        "We couldn't find that review.",
+      );
+      return undefined;
+    }
     deleteReview(db, review.id);
     res.redirect("/account/reviews");
   });
